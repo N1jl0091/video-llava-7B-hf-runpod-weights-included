@@ -2,36 +2,42 @@ FROM runpod/base:0.4.0-cuda11.8.0
 
 WORKDIR /
 
-# Install system dependencies first
-RUN apt-get update && apt-get install -y python3-pip python3-dev && rm -rf /var/lib/apt/lists/*
-
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Verify pip installation and version
 RUN python3 -m pip --version
 
-# Install runpod explicitly first with verbose output
+# Update pip to the latest version
+RUN python3 -m pip install --upgrade pip
+
+# Install RunPod and other dependencies
 RUN python3 -m pip install --no-cache-dir runpod --verbose
 
-# Copy and install other requirements
+# Copy requirements.txt and install dependencies
 COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# Copy source code files
+# Copy application source code
 COPY handler.py predict.py ./
 
-# Download the weights from Hugging Face during build (only once)
+# Download the weights from Hugging Face during build
 RUN mkdir -p /app/weights && \
-    python -c "from transformers import AutoModelForPreTraining; model = AutoModelForPreTraining.from_pretrained('LanguageBind/Video-LLaVA-7B-hf', cache_dir='/app/weights')"
-    
-# Verify files are copied and executable
+    python3 -c "from transformers import AutoModelForPreTraining; model = AutoModelForPreTraining.from_pretrained('LanguageBind/Video-LLaVA-7B-hf', cache_dir='/app/weights')"
+
+# Verify the files are copied and executable
 RUN ls -la /*.py && \
     chmod +x /handler.py /predict.py
 
-# Verify Python path includes working directory
+# Add working directory to Python path
 ENV PYTHONPATH="${PYTHONPATH}:/"
 
-# Simple test of handler import
-RUN python3 -c "import handler" || (echo "Handler import failed" && exit 1)
+# Verify handler.py is importable
+RUN python3 -c "import handler" || (echo 'Handler import failed' && exit 1)
 
-# Set the entry point
+# Set container entry point
 CMD ["python3", "-u", "handler.py"]
+
