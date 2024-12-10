@@ -1,0 +1,30 @@
+# torch
+# transformers
+# numpy
+# av
+# Pillow
+# requests
+# huggingface_hub
+# runpod
+# accelerate>=0.26.0
+# safetensors  # For use_safetensors=True
+# sentencepiece  # Often needed by transformer models
+# protobuf  # For model serialization 
+
+runpod==1.7.5  # or whatever version you need
+torch>=2.0.0
+torchvision
+torchaudio
+transformers==4.42.3
+huggingface_hub[hf_transfer]>=0.23.4
+av==12.2.0
+pillow==10.4.0
+protobuf==5.27.2
+numpy==1.26.4
+bitsandbytes>=0.41.1
+pydantic
+sentencepiece==0.2.0
+accelerate>=0.26.0
+safetensors
+requests
+python-dotenv
